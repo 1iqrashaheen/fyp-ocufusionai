@@ -5,7 +5,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { toast } from "react-toastify";
 import { auth } from "../firebase";
-import UploadAnalyzePage from "../UploadAnalyze/UploadAnalyzePage";
+// import UploadAnalyzePage from "../UploadAnalyze/UploadAnalyzePage";
 
 const Navbar = () => {
   const [sticky, setSticky] = useState(false);
@@ -83,15 +83,11 @@ const Navbar = () => {
         </li>
 
         <li>
-          <Link to="/product">Product</Link>
-        </li>
-
-        <li>
           <Link to="/#about" onClick={(e) => handleInPageNav(e, "about")}>
             About Us
           </Link>
         </li>
-
+        {/* 
         <li>
           <Link
             to="/#testimonials"
@@ -99,12 +95,15 @@ const Navbar = () => {
           >
             Testimonials
           </Link>
-        </li>
+        </li> */}
 
         <li>
           <Link to="/#contact" onClick={(e) => handleInPageNav(e, "contact")}>
             Contact
           </Link>
+        </li>
+        <li>
+          <Link to="/product">Product</Link>
         </li>
         <Link to="/analyze" className="analyze-btn">
           Analyze
@@ -140,24 +139,25 @@ const Navbar = () => {
         <Link to="/#home" onClick={(e) => handleInPageNav(e, "home")}>
           Home
         </Link>
-        <Link to="/product" onClick={closeMenu}>
-          Product
-        </Link>
+
         <Link to="/#about" onClick={(e) => handleInPageNav(e, "about")}>
           About Us
         </Link>
-        <Link
+        {/* <Link
           to="/#testimonials"
           onClick={(e) => handleInPageNav(e, "testimonials")}
         >
           Testimonials
-        </Link>
+        </Link> */}
         <Link to="/#contact" onClick={(e) => handleInPageNav(e, "contact")}>
           Contact
         </Link>
-        <Link to="/analyze" onClick={closeMenu}>
-          UploadAnalyzePage
+        <Link to="/product" onClick={closeMenu}>
+          Product
         </Link>
+        {/* <Link to="/analyze" onClick={closeMenu}>
+          UploadAnalyzePage
+        </Link> */}
       </div>
     </nav>
   );

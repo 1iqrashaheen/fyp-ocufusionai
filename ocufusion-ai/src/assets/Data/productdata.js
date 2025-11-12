@@ -35,9 +35,9 @@ const productData = {
     heading: "How It Works Behind the Scenes",
     icons: [iconBars, iconTree],
     items: [
-      "Real-time AI predictions from OCT scans",
-      "Trained on thousands of expert-labeled images",
-      "Explainable AI with layered overlays",
+      "Preprocessing (resize/normalize)",
+      "Two-modality training (OCT + fundus)",
+      "Teacher → student distillation",
     ],
   },
 };

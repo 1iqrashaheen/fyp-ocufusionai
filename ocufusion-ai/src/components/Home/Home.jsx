@@ -90,9 +90,9 @@ const Home = () => {
           </div>
         </section>
       </div>
-      <Contact />
-      <Testimonial />
       <AboutUs />
+      <Contact />
+      {/* <Testimonial /> */}
     </>
   );
 };

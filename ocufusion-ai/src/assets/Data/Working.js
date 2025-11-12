@@ -1,23 +1,25 @@
-// src/assets/Working.js
 import worksimage from "../worksimage.png";
 
 const workingContent = {
   image: worksimage,
   heading:
-    "OcuFusion AI revolutionizes eye care diagnostics by integrating seamlessly into existing OCT workflows.",
-  intro: `Built with the latest advances in deep learning and medical imaging, OcuFusion AI empowers clinicians with automated, real-time analysis of retinal scans—eliminating guesswork and streamlining the diagnostic process. Our platform not only detects early biomarkers of vision-threatening diseases like Glaucoma and Optic Neuropathy (OR) but also provides explainable, visual insights that enhance clinical confidence and improve patient outcomes. With universal device compatibility and robust compliance with global standards.`,
+    "OcuFusion AI brings Fundus and OCT together for clearer, faster screening support.",
+  intro:
+    "Built with modern CNN and Vision Transformer backbones, OcuFusion AI runs automated analysis on paired retinal scans. Our multimodal fusion head combines complementary features from Fundus (surface & vasculature) and OCT (retinal layers) to predict disease and severity where labels exist. Explainable overlays and downloadable reports help researchers and clinicians review results with confidence. This is a research prototype (non-diagnostic).",
   features: [
-    "✅ FDA-cleared (510K)",
-    "✅ HIPAA-compliant",
-    "✅ CE & GDPR-ready",
-    "✅ Compatible with any OT device",
+    "📄 PDF report with probabilities, severity & overlays",
+    "🧩 Device-agnostic design (tested on public datasets)",
+    "🔒 Privacy-minded flow (no PHI stored by default)",
+    "Simple flow: Upload → Analyze → View results",
   ],
+  // *Adjust the privacy line above once you confirm storage/retention behavior.
+
   chooseUs: [
-    "Speed up diagnosis time by 60%",
-    "Boost diagnostic accuracy and confidence",
-    "Works across all major OCT brands (device-agnostic)",
-    "Supports clinical research and workflow analytics",
-    "Designed in collaboration with ophthalmologists",
+    "Reduce missed cues via multimodal fusion",
+    "Get visual explanations alongside predictions",
+    "Simple upload → analyze → export workflow",
+    "Reproducible metrics for research (accuracy, F1, AUC)",
+    "Modular codebase to plug in new backbones/datasets",
   ],
 };
 

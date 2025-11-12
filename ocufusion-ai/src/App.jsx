@@ -7,7 +7,7 @@ import Home from "./components/Home/Home";
 import LoginSignup from "./components/LoginSignup/loginsignup";
 import Product from "./components/Product/Product";
 import About from "./components/AboutUs/About";
-import Testimonial from "./components/Testimonial/Testimonial";
+// import Testimonial from "./components/Testimonial/Testimonial";
 import Contact from "./components/ContactUs/Contact";
 import UploadAnalyzePage from "./components/UploadAnalyze/UploadAnalyzePage";
 import { ToastContainer } from "react-toastify";
@@ -20,7 +20,7 @@ const App = () => (
       <Route path="/" element={<Home />} />
       <Route path="/product" element={<Product />} />
       <Route path="/about" element={<About />} />
-      <Route path="/testimonials" element={<Testimonial />} />
+      {/* <Route path="/testimonials" element={<Testimonial />} /> */}
       <Route path="/contact" element={<Contact />} />
       <Route path="/analyze" element={<UploadAnalyzePage />} />
       <Route path="/login" element={<LoginSignup />} />

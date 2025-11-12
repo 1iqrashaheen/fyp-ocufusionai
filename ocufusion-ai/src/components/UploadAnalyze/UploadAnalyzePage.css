@@ -220,6 +220,103 @@ body {
   display: grid;
   gap: 14px;
 }
+.prediction-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 12px;
+}
+.prediction-card {
+  border: 1px solid #ecf0f2;
+  border-radius: 12px;
+  padding: 16px;
+  background: #fbfeff;
+}
+.prediction-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.prediction-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.summary-item {
+  border: 1px solid #ecf3f4;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f8fcfd;
+}
+.summary-item span {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.summary-item strong {
+  font-size: 15px;
+  color: var(--text);
+}
+.probability-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+.probability-table th,
+.probability-table td {
+  text-align: left;
+  padding: 8px 6px;
+  border-bottom: 1px solid #edf2f4;
+}
+.probability-cell {
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+.probability-bar-cell {
+  width: 45%;
+}
+.raw-json {
+  margin-top: 12px;
+}
+.raw-json summary {
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--teal);
+}
+.raw-json pre {
+  margin: 8px 0 0;
+  padding: 12px;
+  background: #0f1b20;
+  color: #c7f0ff;
+  font-size: 12px;
+  border-radius: 10px;
+  max-height: 240px;
+  overflow: auto;
+}
+.file-name {
+  font-weight: 600;
+  color: var(--text);
+}
+.file-sub {
+  color: var(--muted);
+  font-size: 13px;
+  text-transform: capitalize;
+}
+.confidence-pill {
+  background: var(--teal-quiet);
+  color: var(--teal);
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+}
 .result-row .row-head {
   display: flex;
   align-items: center;
@@ -340,4 +437,62 @@ body {
 .file-label {
   font-size: 13px;
   color: var(--muted);
+}
+
+.debug-panel {
+  margin-top: 24px;
+  border-top: 1px dashed var(--border);
+  padding-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.debug-panel-header {
+  font-weight: 700;
+  font-size: 15px;
+}
+.debug-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+.debug-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.debug-input {
+  flex: 1;
+  min-width: 220px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+}
+.debug-status {
+  font-size: 13px;
+  color: var(--muted);
+}
+.debug-log {
+  max-height: 180px;
+  overflow-y: auto;
+  border: 1px dashed #dfecef;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f6fbfc;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12px;
+  color: #4b5d65;
+}
+.debug-line {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+}
+.debug-line strong {
+  color: #24333a;
+  font-size: 12px;
 }

@@ -17,14 +17,15 @@ else:
     load_dotenv()  # fall back to system/global env
 
 _DEFAULT_LABELS = [
+    "Normal",
     "Diabetic Retinopathy",
-    "Glaucoma",
-    "Age-related Macular Degeneration",
-    "Macular Edema",
-    "Macular Hole",
-    "Retinal Detachment",
-    "Central Serous Retinopathy",
-    "Hypertensive Retinopathy",
+"Glaucoma",
+"Age-related Macular Degeneration",
+"Macular Edema",
+"Macular Hole",
+"Retinal Detachment",
+"Central Serous Retinopathy",
+"Hypertensive Retinopathy"
 ]
 
 

@@ -1,32 +1,105 @@
 import React, { useMemo, useState, useEffect } from "react";
-import "./uploadAnalyzePage.css";
+import "./UploadAnalyzePage.css";
 
-const DISEASES = [
-  "Diabetic Retinopathy",
-  "Glaucoma",
-  "Age-related Macular Degeneration",
-  "Macular Edema",
-  "Macular Hole",
-  "Retinal Detachment",
-  "Central Serous Retinopathy",
-  "Hypertensive Retinopathy",
-];
+const DEFAULT_API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(
+  /\/$/,
+  ""
+);
 
-const API_BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:5001";
+const STORAGE_KEY = "ocf_api_base_url";
+
+function sanitizeBaseUrl(value) {
+  if (!value) return "";
+  return value.trim().replace(/\/$/, "");
+}
+
+function formatPercent(value) {
+  return Number((value * 100).toFixed(2));
+}
+
+async function requestPrediction(file, modality, baseUrl, logDebug) {
+  const endpoint = `${baseUrl}/predict/${modality}`;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  logDebug?.("Uploading file", {
+    endpoint,
+    modality,
+    filename: file.name,
+  });
+
+  let response;
+  try {
+    response = await fetch(endpoint, {
+      method: "POST",
+      mode: "cors",
+      body: formData,
+    });
+  } catch (networkError) {
+    logDebug?.("Network error while posting", {
+      endpoint,
+      error: networkError?.message,
+    });
+    throw new Error(
+      `Unable to reach ${endpoint}. Ensure the remote server/tunnel is online.`
+    );
+  }
+
+  let payload = null;
+  try {
+    payload = await response.json();
+  } catch (_err) {
+    /* ignore JSON parse errors so we can surface a friendlier message */
+  }
+
+  if (!response.ok || !payload) {
+    logDebug?.("Endpoint returned error", {
+      endpoint,
+      status: response.status,
+      payload,
+    });
+    const message =
+      payload?.error ||
+      `AI service returned status ${response.status}. Check the backend logs.`;
+    throw new Error(message);
+  }
+
+  logDebug?.("Prediction received", {
+    endpoint,
+    status: response.status,
+    predicted: payload.predicted_class_name,
+    confidence: payload.confidence,
+  });
+
+  return {
+    filename: file.name || "upload",
+    modality: (payload.modality || modality || "fundus").toUpperCase(),
+    data: payload,
+  };
+  debugger;
+}
 
 export default function UploadAnalyzePage() {
+  const initialBaseUrl =
+    typeof window !== "undefined"
+      ? window.localStorage.getItem(STORAGE_KEY) || DEFAULT_API_BASE_URL
+      : DEFAULT_API_BASE_URL;
+
   const [octFiles, setOctFiles] = useState([]);
   const [fundusFiles, setFundusFiles] = useState([]);
 
   const [consented, setConsented] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [results, setResults] = useState(null);
+  const [results, setResults] = useState([]);
   const [resetSelected, setResetSelected] = useState(false);
   const [octPreviews, setOctPreviews] = useState([]);
   const [fundusPreviews, setFundusPreviews] = useState([]);
-  const [fileResults, setFileResults] = useState({ fundus: [], oct: [] });
   const [serverError, setServerError] = useState(null);
+  const [apiBaseUrl, setApiBaseUrl] = useState(initialBaseUrl);
+  const [apiInput, setApiInput] = useState(initialBaseUrl);
+  const [debugEntries, setDebugEntries] = useState([]);
+  const [pingStatus, setPingStatus] = useState(null);
+  const [isPinging, setIsPinging] = useState(false);
 
   const canAnalyze = useMemo(
     () =>
@@ -36,8 +109,71 @@ export default function UploadAnalyzePage() {
     [consented, octFiles, fundusFiles, isAnalyzing]
   );
 
-  const acceptOct = [".dcm", ".dicom", "image/png", "image/jpeg"];
-  const acceptFundus = ["image/png", "image/jpeg"];
+  const acceptOct = [".png", ".jpg", ".jpeg", "image/png", "image/jpeg"];
+  const acceptFundus = [".png", ".jpg", ".jpeg", "image/png", "image/jpeg"];
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(STORAGE_KEY, apiBaseUrl);
+    }
+  }, [apiBaseUrl]);
+
+  function logDebug(message, data) {
+    const entry = {
+      timestamp: new Date().toLocaleTimeString(),
+      message,
+      data,
+    };
+    setDebugEntries((prev) => [...prev.slice(-9), entry]);
+    if (data !== undefined) {
+      console.debug(`[UploadAnalyze] ${message}`, data);
+    } else {
+      console.debug(`[UploadAnalyze] ${message}`);
+    }
+  }
+
+  function applyApiBase() {
+    const sanitized = sanitizeBaseUrl(apiInput);
+    if (!sanitized) {
+      setServerError("Please enter a valid API base URL.");
+      return;
+    }
+    setServerError(null);
+    setApiBaseUrl(sanitized);
+    setApiInput(sanitized);
+    logDebug("API base URL applied", { sanitized });
+  }
+
+  function resetApiBase() {
+    setApiBaseUrl(DEFAULT_API_BASE_URL);
+    setApiInput(DEFAULT_API_BASE_URL);
+    logDebug("API base URL reset", { value: DEFAULT_API_BASE_URL });
+  }
+
+  async function pingBackend() {
+    if (!apiBaseUrl) {
+      setPingStatus("Set the API base URL first.");
+      return;
+    }
+    const target = `${apiBaseUrl}/health`;
+    setIsPinging(true);
+    setPingStatus("Pinging...");
+    logDebug("Pinging backend", { target });
+    try {
+      const response = await fetch(target, { method: "GET", mode: "cors" });
+      if (!response.ok) {
+        throw new Error(`Status ${response.status}`);
+      }
+      setPingStatus("Reachable");
+      logDebug("Ping successful", { status: response.status });
+    } catch (error) {
+      const message = error?.message || "Ping failed";
+      setPingStatus(`Ping failed: ${message}`);
+      logDebug("Ping failed", { error: message });
+    } finally {
+      setIsPinging(false);
+    }
+  }
 
   // Build preview URLs for image files only (skip DICOM)
   useEffect(() => {
@@ -93,40 +229,44 @@ export default function UploadAnalyzePage() {
 
   async function analyze() {
     if (!canAnalyze) return;
+    if (!apiBaseUrl) {
+      setServerError(
+        "Set the API base URL in the debug panel before analyzing."
+      );
+      return;
+    }
 
     setIsAnalyzing(true);
-    setResults(null);
+    setResults([]);
     setServerError(null);
-    setFileResults({ fundus: [], oct: [] });
-
-    const formData = new FormData();
-    octFiles.forEach((file) => formData.append("oct_images", file));
-    fundusFiles.forEach((file) => formData.append("fundus_images", file));
 
     try {
-      const response = await fetch(`${API_BASE_URL}/predict`, {
-        method: "POST",
-        body: formData,
+      logDebug("Analyze started", {
+        apiBaseUrl,
+        octFiles: octFiles.length,
+        fundusFiles: fundusFiles.length,
       });
 
-      let payload = null;
-      try {
-        payload = await response.json();
-      } catch (_err) {
-        /* ignore JSON parsing errors so we can show a friendly message */
+      const jobs = [
+        ...octFiles.map((file) => ({ file, modality: "oct" })),
+        ...fundusFiles.map((file) => ({ file, modality: "fundus" })),
+      ];
+
+      if (jobs.length === 0) {
+        logDebug("No files queued for analysis");
+        return;
       }
 
-      if (!response.ok || !payload) {
-        const message = payload?.error || "Unable to analyze uploads right now.";
-        throw new Error(message);
-      }
+      const responses = await Promise.all(
+        jobs.map(({ file, modality }) =>
+          requestPrediction(file, modality, apiBaseUrl, logDebug)
+        )
+      );
 
-      setResults(payload.results || []);
-      setFileResults({
-        fundus: payload.files?.fundus || [],
-        oct: payload.files?.oct || [],
-      });
+      logDebug("Predictions completed", { count: responses.length });
+      setResults(responses);
     } catch (error) {
+      logDebug("Analyze failed", { error: error?.message });
       setServerError(
         error.message || "Unexpected error while contacting the AI service."
       );
@@ -138,20 +278,46 @@ export default function UploadAnalyzePage() {
   function reset() {
     setOctFiles([]);
     setFundusFiles([]);
-    setResults(null);
+    setResults([]);
     setConsented(false);
     setResetSelected(false);
     setServerError(null);
-    setFileResults({ fundus: [], oct: [] });
+    logDebug("Form reset");
   }
 
   function buildReportHtml() {
     const now = new Date();
     const dateStr = now.toLocaleString();
-    const rows = (results || []).map(
-      ({ name, score }) =>
-        `<tr><td style="padding:8px 12px;border:1px solid #e3e7ea;">${name}</td><td style="padding:8px 12px;border:1px solid #e3e7ea;text-align:right;">${score}%</td></tr>`
-    );
+    const sections =
+      results.length === 0
+        ? "<p>No analysis results available.</p>"
+        : results
+            .map(({ filename, modality, data }) => {
+              const predicted = data?.predicted_class_name || "Unknown";
+              const confidence =
+                typeof data?.confidence === "number"
+                  ? `${formatPercent(data.confidence)}%`
+                  : "N/A";
+              const probabilityRows = Object.entries(
+                data?.all_probabilities_named || {}
+              )
+                .map(
+                  ([name, value]) =>
+                    `<tr><td style="padding:6px 10px;border:1px solid #e3e7ea;">${name}</td><td style="padding:6px 10px;border:1px solid #e3e7ea;text-align:right;">${formatPercent(
+                      typeof value === "number" ? value : 0
+                    )}%</td></tr>`
+                )
+                .join("");
+              return `<section style="margin-bottom:24px;">
+  <h2 style="margin:0 0 4px;font-size:18px;">${filename}</h2>
+  <div style="color:#49606b;font-size:14px;margin-bottom:8px;">${modality} • Top match: <strong>${predicted}</strong> (${confidence})</div>
+  <table style="border-collapse:collapse;width:100%;font-size:14px;">
+    <thead><tr><th style="text-align:left;padding:6px 10px;border:1px solid #e3e7ea;">Condition</th><th style="text-align:right;padding:6px 10px;border:1px solid #e3e7ea;">Probability</th></tr></thead>
+    <tbody>${probabilityRows}</tbody>
+  </table>
+</section>`;
+            })
+            .join("");
     return `<!doctype html>
 <html>
   <head>
@@ -170,19 +336,14 @@ export default function UploadAnalyzePage() {
   <body>
     <h1>Ocufusion AI — Analysis Report</h1>
     <div class="meta">Generated: ${dateStr}</div>
-    <table>
-      <thead><tr><th>Condition</th><th style="text-align:right;">Probability</th></tr></thead>
-      <tbody>
-        ${rows.join("\n")}
-      </tbody>
-    </table>
+    ${sections}
     <div class="footer">This report is for informational purposes only and not medical advice.</div>
   </body>
 </html>`;
   }
 
   function viewReport() {
-    if (!results || results.length === 0) return;
+    if (results.length === 0) return;
     const html = buildReportHtml();
     const w = window.open("", "_blank");
     if (!w) return;
@@ -192,7 +353,7 @@ export default function UploadAnalyzePage() {
   }
 
   function downloadReport() {
-    if (!results || results.length === 0) return;
+    if (results.length === 0) return;
     const html = buildReportHtml();
     const w = window.open("", "_blank");
     if (!w) return;
@@ -200,7 +361,9 @@ export default function UploadAnalyzePage() {
     w.document.write(html);
     w.document.close();
     w.onload = () => {
-      try { w.focus(); } catch (e) {}
+      try {
+        w.focus();
+      } catch (e) {}
       w.print();
     };
   }
@@ -231,13 +394,13 @@ export default function UploadAnalyzePage() {
               <div className="drop-icon" aria-hidden />
               <div className="drop-text">
                 <strong>Select files</strong> or drag &amp; drop
-                <div className="sub">DICOM, PNG, JPG</div>
+                <div className="sub">PNG, JPG</div>
               </div>
               <input
                 type="file"
                 multiple
                 onChange={(e) => handlePick(e, "oct")}
-                accept=".dcm,.dicom,image/png,image/jpeg"
+                accept=".png,.jpg,.jpeg,image/png,image/jpeg"
                 aria-label="Upload OCT scans"
               />
             </div>
@@ -292,7 +455,7 @@ export default function UploadAnalyzePage() {
                 type="file"
                 multiple
                 onChange={(e) => handlePick(e, "fundus")}
-                accept="image/png,image/jpeg"
+                accept=".png,.jpg,.jpeg,image/png,image/jpeg"
                 aria-label="Upload fundus images"
               />
             </div>
@@ -314,7 +477,10 @@ export default function UploadAnalyzePage() {
               ))}
             </div>
             {fundusPreviews.some(Boolean) && (
-              <div className="image-previews" aria-label="Fundus image previews">
+              <div
+                className="image-previews"
+                aria-label="Fundus image previews"
+              >
                 {fundusPreviews.map((src, i) => (
                   <img
                     key={i}
@@ -368,7 +534,7 @@ export default function UploadAnalyzePage() {
             </div>
           )}
 
-          {!results && !serverError && (
+          {results.length === 0 && !serverError && (
             <div className="no-results">
               <div className="doc-icon" aria-hidden />
               <div className="no-results-text">
@@ -377,64 +543,129 @@ export default function UploadAnalyzePage() {
             </div>
           )}
 
-          {results && (
-            <ul className="results">
-              {results.map(({ name, score }) => (
-                <li key={name} className="result-row">
-                  <div className="row-head">
-                    <span className="name">{name}</span>
-                    <span className="val">{score}%</span>
-                  </div>
-                  <div
-                    className="bar"
-                    role="progressbar"
-                    aria-label={`${name} probability`}
-                    aria-valuemin={0}
-                    aria-valuemax={100}
-                    aria-valuenow={score}
-                  >
-                    <div
-                      className="bar-fill"
-                      style={{ width: `${Math.max(0, Math.min(100, score))}%` }}
-                    />
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
+          {results.length > 0 && (
+            <div className="prediction-cards">
+              {results.map((entry, idx) => {
+                const payload = entry.data || {};
+                const probabilityEntries = Object.entries(
+                  payload.all_probabilities_named || {}
+                ).filter(([, value]) => typeof value === "number");
+                const sortedProbabilities = probabilityEntries.sort(
+                  (a, b) => Number(b[1]) - Number(a[1])
+                );
+                const confidence =
+                  typeof payload.confidence === "number"
+                    ? formatPercent(payload.confidence)
+                    : null;
 
-          {(fileResults.fundus.length > 0 || fileResults.oct.length > 0) && (
-            <div className="file-breakdown">
-              {["oct", "fundus"].map((type) =>
-                fileResults[type].length > 0 ? (
-                  <div key={type} className="file-group">
-                    <div className="file-group-title">
-                      {type === "oct" ? "OCT scans" : "Fundus images"}
+                return (
+                  <article
+                    key={`${entry.filename}-${idx}`}
+                    className="prediction-card"
+                  >
+                    <div className="prediction-card-head">
+                      <div>
+                        <div className="file-name">{entry.filename}</div>
+                        <div className="file-sub">
+                          {entry.modality} •{" "}
+                          <strong>
+                            {payload.predicted_class_name ||
+                              payload.predicted_class ||
+                              "Unknown"}
+                          </strong>
+                        </div>
+                      </div>
+                      {confidence !== null && (
+                        <div className="confidence-pill">
+                          {confidence}% confidence
+                        </div>
+                      )}
                     </div>
-                    <ul>
-                      {fileResults[type].map((entry, index) => (
-                        <li key={`${type}-${entry.filename}-${index}`}>
-                          <div className="file-meta">
-                            <strong>{entry.filename}</strong>
-                            <span className="file-label">
-                              {entry.category} ({entry.confidence.toFixed(1)}%)
-                            </span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null
-              )}
+
+                    <div className="prediction-summary">
+                      <div className="summary-item">
+                        <span>predicted_class</span>
+                        <strong>{payload.predicted_class || "—"}</strong>
+                      </div>
+                      <div className="summary-item">
+                        <span>predicted_class_name</span>
+                        <strong>{payload.predicted_class_name || "—"}</strong>
+                      </div>
+                      <div className="summary-item">
+                        <span>confidence</span>
+                        <strong>
+                          {confidence !== null ? `${confidence}%` : "—"}
+                        </strong>
+                      </div>
+                      <div className="summary-item">
+                        <span>modality</span>
+                        <strong>{payload.modality || entry.modality}</strong>
+                      </div>
+                    </div>
+
+                    <table className="probability-table">
+                      <thead>
+                        <tr>
+                          <th>Condition</th>
+                          <th style={{ width: "110px" }}>Probability</th>
+                          <th aria-hidden />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sortedProbabilities.map(([name, value]) => {
+                          const percent = formatPercent(Number(value));
+                          return (
+                            <tr key={`${entry.filename}-${name}`}>
+                              <td>{name}</td>
+                              <td className="probability-cell">
+                                <span>{percent}%</span>
+                              </td>
+                              <td className="probability-bar-cell">
+                                <div
+                                  className="bar"
+                                  role="progressbar"
+                                  aria-label={`${name} probability`}
+                                  aria-valuemin={0}
+                                  aria-valuemax={100}
+                                  aria-valuenow={percent}
+                                >
+                                  <div
+                                    className="bar-fill"
+                                    style={{
+                                      width: `${Math.max(
+                                        0,
+                                        Math.min(100, percent)
+                                      )}%`,
+                                    }}
+                                  />
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+
+                    <details className="raw-json">
+                      <summary>Raw JSON response</summary>
+                      <pre>{JSON.stringify(payload, null, 2)}</pre>
+                    </details>
+                  </article>
+                );
+              })}
             </div>
           )}
 
-          {results && results.length > 0 && (
+          {results.length > 0 && (
             <div className="actions" style={{ marginTop: 12 }}>
               <button type="button" className="btn ghost" onClick={viewReport}>
                 View Report
               </button>
-              <button type="button" className="btn primary" onClick={downloadReport}>
+              <button
+                type="button"
+                className="btn primary"
+                onClick={downloadReport}
+              >
                 Download PDF
               </button>
             </div>
@@ -444,6 +675,66 @@ export default function UploadAnalyzePage() {
             Uploads are used for image analysis. Outputs are for informational
             purposes and not intended as medical advice.
           </p>
+
+          <section className="debug-panel">
+            <div className="debug-panel-header">Connection debug</div>
+            <label className="debug-label" htmlFor="api-base-input">
+              API base URL
+            </label>
+            <div className="debug-row">
+              <input
+                id="api-base-input"
+                type="text"
+                className="debug-input"
+                value={apiInput}
+                onChange={(e) => setApiInput(e.target.value)}
+                placeholder="https://your-server.ngrok-free.app"
+              />
+              <button
+                type="button"
+                className="btn ghost"
+                onClick={applyApiBase}
+              >
+                Apply
+              </button>
+              <button
+                type="button"
+                className="btn ghost"
+                onClick={resetApiBase}
+              >
+                Reset
+              </button>
+            </div>
+
+            <div className="debug-row">
+              <button
+                type="button"
+                className="btn primary"
+                onClick={pingBackend}
+                disabled={isPinging}
+              >
+                {isPinging ? "Pinging…" : "Ping server"}
+              </button>
+              {pingStatus && <span className="debug-status">{pingStatus}</span>}
+            </div>
+
+            {debugEntries.length > 0 && (
+              <div className="debug-log">
+                {debugEntries
+                  .slice()
+                  .reverse()
+                  .map((entry, index) => (
+                    <div
+                      key={`${entry.timestamp}-${index}`}
+                      className="debug-line"
+                    >
+                      <strong>{entry.timestamp}</strong>
+                      <span>{entry.message}</span>
+                    </div>
+                  ))}
+              </div>
+            )}
+          </section>
         </aside>
       </main>
     </div>

@@ -4,11 +4,11 @@ const aboutUsData = {
   heading: "About Us",
   image: aboutImage,
   description:
-    "Ocufusion AI is a research-driven FYP project built to improve retinal disease diagnosis using deep learning and explainable multimodal analysis. It flags early signs of Diabetic Retinopathy and Glaucoma using OCT scan biomarkers.",
+    "OcuFusion AI is a research-driven Final Year Project that improves retinal screening by combining Fundus photographs and OCT scans with deep learning. Using multimodal fusion and explainable overlays, it supports early detection of multiple eye disease like Glaucoma and Diabetic Retinopathy. This is a research prototype and not a medical device.",
   bullets: [
-    "Detects over 70+ retinal markers",
-    "Seamlessly integrates into existing clinical software",
-    "Improves early-stage triage and specialist support",
+    "Multimodal analysis (Fundus + OCT) in one pipeline",
+    "Explainable heatmaps and visual summaries",
+    "Reproducible training, inference, and PDF reports",
   ],
 };
 
