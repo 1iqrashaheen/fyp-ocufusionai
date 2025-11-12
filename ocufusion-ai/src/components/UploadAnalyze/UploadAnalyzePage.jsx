@@ -384,7 +384,7 @@ export default function UploadAnalyzePage() {
         <section className="ocf-card">
           <h1 className="ocf-title">Upload &amp; Analyze</h1>
 
-          <div className="ocf-block">
+          {/* <div className="ocf-block">
             <h2>Upload your OCT scans</h2>
             <div
               className="dropzone"
@@ -437,7 +437,7 @@ export default function UploadAnalyzePage() {
                 )}
               </div>
             )}
-          </div>
+          </div> */}
 
           <div className="ocf-block">
             <h2>Upload your fundus images</h2>
