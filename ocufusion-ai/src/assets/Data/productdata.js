@@ -15,16 +15,16 @@ const productData = {
     // backgroundImage: headerBg,
   },
   mainCard: {
-    tags: [
-      { label: "Severity", style: "severity" },
-      { label: "Score: 64/128", style: "score" },
-    ],
+    // tags: [
+    //   { label: "Severity", style: "severity" },
+    //   { label: "Score: 64/128", style: "score" },
+    // ],
     image: mainScan,
     // label: "Confluent Drusen",
-    actions: [
-      { text: "Add to Report", variant: "default" },
-      { text: "Review Other Scans", variant: "primary" },
-    ],
+    // actions: [
+    //   { text: "Add to Report", variant: "default" },
+    //   { text: "Review Other Scans", variant: "primary" },
+    // ],
   },
   thumbnails: [
     { src: thumb1, label: "Diabetic Macular Edema" },

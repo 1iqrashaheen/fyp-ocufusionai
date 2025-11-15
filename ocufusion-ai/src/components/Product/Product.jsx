@@ -22,20 +22,20 @@ const Product = () => {
         {/* Main Scan Card */}
         <div className="product-main-card">
           <div className="product-main-card__tags">
-            {mainCard.tags.map((tag, i) => (
+            {/* {mainCard.tags.map((tag, i) => (
               <span key={i} className={`product-tag product-tag--${tag.style}`}>
                 {tag.label}
               </span>
-            ))}
+            ))} */}
           </div>
           <img
             src={mainCard.image}
-            alt={mainCard.label}
+            // alt={mainCard.label}
             className="product-main-card__image"
           />
           <span className="product-main-card__label">{mainCard.label}</span>
           <div className="product-main-card__actions">
-            {mainCard.actions.map((action, i) => (
+            {/* {mainCard.actions.map((action, i) => (
               <button
                 key={i}
                 className={`btn product-action-btn ${
@@ -46,7 +46,7 @@ const Product = () => {
               >
                 {action.text}
               </button>
-            ))}
+            ))} */}
           </div>
         </div>
 
