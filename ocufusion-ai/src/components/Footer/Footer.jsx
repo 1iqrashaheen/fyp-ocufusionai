@@ -15,8 +15,8 @@ const Footer = () => {
             <h1>OcufusionAI</h1>
           </div>
           <p>
-            Automated Decision Support for Accurate &amp; Fast OCT Scan
-            Analysis.
+            Automated Decision Support for Accurate &amp; Fast Fundus images and
+            OCT Scan Analysis.
           </p>
         </div>
 

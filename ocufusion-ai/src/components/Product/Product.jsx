@@ -1,10 +1,35 @@
 // src/components/Product/Product.jsx
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import "./Product.css";
 import productData from "../../assets/Data/productdata";
+import { useLocation } from "react-router-dom";
 
 const Product = () => {
-  const { header, mainCard, thumbnails, behind } = productData;
+  const { header, mainCard, galleries, behind } = productData;
+  const videoRef = useRef(null);
+  const location = useLocation();
+
+  const handleDemoClick = () => {
+    if (!videoRef.current) return;
+    try {
+      videoRef.current.currentTime = 0;
+      const playPromise = videoRef.current.play();
+      if (playPromise && typeof playPromise.then === "function") {
+        playPromise.catch(() => {
+          /* Autoplay protections intentionally ignored */
+        });
+      }
+      videoRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    } catch (error) {
+      console.error("Unable to start demo video", error);
+    }
+  };
+
+  useEffect(() => {
+    if (location.hash === "#demo") {
+      handleDemoClick();
+    }
+  }, [location.hash]);
 
   return (
     <div className="product-page">
@@ -12,13 +37,16 @@ const Product = () => {
       <header className="product-header">
         <h1 className="product-header__title">{header.title}</h1>
         <p className="product-header__subtitle">{header.subtitle}</p>
-        <button className="product-header__demo-btn btn">
+        <button
+          className="product-header__demo-btn btn"
+          onClick={handleDemoClick}
+        >
           {header.buttonText}
         </button>
       </header>
 
       {/* Combined Demo Section */}
-      <section className="product-demo">
+      <section className="product-demo" id="demo">
         {/* Main Scan Card */}
         <div className="product-main-card">
           <div className="product-main-card__tags">
@@ -28,37 +56,51 @@ const Product = () => {
               </span>
             ))} */}
           </div>
-          <img
-            src={mainCard.image}
-            // alt={mainCard.label}
-            className="product-main-card__image"
-          />
-          <span className="product-main-card__label">{mainCard.label}</span>
-          <div className="product-main-card__actions">
-            {/* {mainCard.actions.map((action, i) => (
-              <button
-                key={i}
-                className={`btn product-action-btn ${
-                  action.variant === "primary"
-                    ? "product-action-btn--primary"
-                    : ""
-                }`}
+          <div className="product-video">
+            <div className="product-video__frame">
+              <video
+                ref={videoRef}
+                className="product-video__player"
+                src={mainCard.demoVideo.src}
+                preload="metadata"
+                controls
+                controlsList="nodownload noremoteplayback"
+                disablePictureInPicture
+                onContextMenu={(event) => event.preventDefault()}
+                playsInline
               >
-                {action.text}
-              </button>
-            ))} */}
+                <track kind="captions" />
+              </video>
+            </div>
           </div>
         </div>
+      </section>
 
-        {/* Thumbnails */}
-        <div className="product-thumbs">
-          {thumbnails.map((t, i) => (
-            <div className="product-thumb" key={i}>
-              <img src={t.src} alt={t.label} className="product-thumb__image" />
-              <p className="product-thumb__label">{t.label}</p>
+      {/* Reference Galleries */}
+      <section className="product-galleries">
+        <p className="product-gallery__intro">{galleries.intro}</p>
+        {[galleries.fundus, galleries.oct].map((gallery, idx) => (
+          <div className="product-gallery" key={`${gallery.heading}-${idx}`}>
+            <div className="product-gallery__header">
+              <h3 className="product-gallery__heading">{gallery.heading}</h3>
+              <p className="product-gallery__description">
+                {gallery.description}
+              </p>
             </div>
-          ))}
-        </div>
+            <div className="product-thumbs">
+              {gallery.items.map((item) => (
+                <div className="product-thumb" key={item.short}>
+                  <img
+                    src={item.src}
+                    alt={item.label}
+                    className="product-thumb__image"
+                  />
+                  <p className="product-thumb__label">{item.label}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </section>
 
       {/* Behind the Scenes */}

@@ -1,118 +1,3 @@
-// import React, { useState } from "react";
-// import {
-//   FaUser,
-//   FaEnvelope,
-//   FaLock,
-//   FaEye,
-//   FaGoogle,
-//   FaFacebookF,
-// } from "react-icons/fa";
-// import "./LoginSignup.css";
-// import loginimage from "../../assets/loginimage.png";
-// import signupimage from "../../assets/signupimage.png";
-
-// const LoginSignup = () => {
-//   const [isLogin, setIsLogin] = useState(true);
-//   const [showPw, setShowPw] = useState(false);
-
-//   return (
-//     <div className="ls-container">
-//       {/* Single .ls-card with dynamic background */}
-//       <div
-//         className="ls-card"
-//         // style={{
-//         //   backgroundImage: `url(${isLogin ? loginimage : signupimage})`,
-//         // }}
-//       >
-//         <div className="ls-form">
-//           <div className="ls-form-headings">
-//             {" "}
-//             <h2>
-//               {isLogin
-//                 ? "Welcome Back to Ocufusion AI"
-//                 : "Create Your Ocufusion AI Account"}
-//             </h2>
-//             <p>
-//               {isLogin
-//                 ? "Please login to your dashboard to continue."
-//                 : "Join our AI-powered diagnostic platform."}
-//             </p>
-//           </div>
-//           <form>
-//             {!isLogin && (
-//               <div className="field">
-//                 <FaUser className="icon" />
-//                 <input type="text" placeholder="Full Name" required />
-//               </div>
-//             )}
-//             <div className="field">
-//               <FaEnvelope className="icon" />
-//               <input type="email" placeholder="Email Address" required />
-//             </div>
-//             <div className="field">
-//               <FaLock className="icon" />
-//               <input
-//                 type={showPw ? "text" : "password"}
-//                 placeholder="Password"
-//                 required
-//               />
-//               <FaEye className="toggle" onClick={() => setShowPw((s) => !s)} />
-//             </div>
-//             {!isLogin && (
-//               <div className="field">
-//                 <FaLock className="icon" />
-//                 <input
-//                   type={showPw ? "text" : "password"}
-//                   placeholder="Confirm Password"
-//                   required
-//                 />{" "}
-//                 <FaEye
-//                   className="toggle"
-//                   onClick={() => setShowPw((s) => !s)}
-//                 />
-//               </div>
-//             )}
-//             {!isLogin && (
-//               <label className="checkbox">
-//                 <input type="checkbox" required />I agree to the{" "}
-//                 <a>Terms & Privacy Policy</a>
-//               </label>
-//             )}
-//             <button type="submit" className="btn">
-//               {isLogin ? "Login" : "Sign Up"}
-//             </button>
-//           </form>
-
-//           <div className="oauth">
-//             <div className="divider">
-//               <span>Or continue with</span>
-//             </div>
-//             <div className="providers">
-//               <FaGoogle />
-//               <FaFacebookF />
-//             </div>
-//           </div>
-
-//           <p className="switch">
-//             {isLogin ? "Don’t have an account? " : "Already have an account? "}
-//             <span onClick={() => setIsLogin((l) => !l)}>
-//               {isLogin ? "Sign up here" : "Log in here"}
-//             </span>
-//           </p>
-//         </div>
-//         <div className="ls-image-wrapper">
-//           <img
-//             src={isLogin ? loginimage : signupimage}
-//             alt=""
-//             className="ls-background-image"
-//           />
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default LoginSignup;
 import React, { useState } from "react";
 import {
   FaUser,
@@ -216,7 +101,7 @@ const LoginSignup = () => {
       try {
         const providers = await fetchSignInMethodsForEmail(
           auth,
-          attemptedEmail,
+          attemptedEmail
         );
         if (!providers.length) {
           toast.warning("Account not found. Please sign up first.");
@@ -255,7 +140,7 @@ const LoginSignup = () => {
     const hasSpecial = /[^A-Za-z0-9]/.test(password);
     if (!(hasLetter && hasNumber && hasSpecial)) {
       toast.warning(
-        "Password must include letters, numbers, and at least one special character.",
+        "Password must include letters, numbers, and at least one special character."
       );
       return;
     }
@@ -273,7 +158,7 @@ const LoginSignup = () => {
         const userCredential = await createUserWithEmailAndPassword(
           auth,
           trimmedEmail,
-          password,
+          password
         );
         // Store the display name if provided so it can be used elsewhere
         if (fullName.trim()) {
@@ -347,7 +232,7 @@ const LoginSignup = () => {
             </h2>
             <p>
               {isLogin
-                ? "Please login to your dashboard to continue."
+                ? "Please login to continue."
                 : "Join our AI-powered diagnostic platform."}
             </p>
           </div>
@@ -418,7 +303,7 @@ const LoginSignup = () => {
             </button>
           </form>
 
-          <div className="oauth">
+          {/* <div className="oauth">
             <div className="divider">
               <span>Or continue with</span>
             </div>
@@ -432,7 +317,7 @@ const LoginSignup = () => {
                 style={{ cursor: "pointer" }}
               />
             </div>
-          </div>
+          </div> */}
 
           <p className="switch">
             {isLogin ? "Don’t have an account? " : "Already have an account? "}

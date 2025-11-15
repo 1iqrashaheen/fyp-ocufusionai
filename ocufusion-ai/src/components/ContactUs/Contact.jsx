@@ -90,7 +90,7 @@ const Contact = () => {
   };
 
   const handleDemoClick = () => {
-    navigate("/product");
+    navigate("/product#demo");
   };
 
   return (
