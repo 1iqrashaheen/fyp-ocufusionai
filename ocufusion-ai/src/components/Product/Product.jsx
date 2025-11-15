@@ -9,6 +9,10 @@ const Product = () => {
   const videoRef = useRef(null);
   const location = useLocation();
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, []);
+
   const handleDemoClick = () => {
     if (!videoRef.current) return;
     try {
