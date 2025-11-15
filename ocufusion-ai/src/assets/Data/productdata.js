@@ -10,7 +10,7 @@ import iconTree from "../workflow-trees.png";
 const productData = {
   header: {
     title: "AI Decision Support for OCT",
-    subtitle: "See how Ocufusion AI interprets scans with unmatched precision.",
+    subtitle: "See how Ocufusion AI interprets scans and gave you reults",
     buttonText: "Demo",
     // backgroundImage: headerBg,
   },
@@ -35,9 +35,9 @@ const productData = {
     heading: "How It Works Behind the Scenes",
     icons: [iconBars, iconTree],
     items: [
-      "Preprocessing (resize/normalize)",
-      "Two-modality training (OCT + fundus)",
-      "Teacher → student distillation",
+      "The system first cleans and prepares your eye images, for example by making them the right size and adjusting the brightness, so they are clear and easy to read.",
+      "It then looks at two types of eye scans together (a normal color eye photo (Fundus) and a deeper cross-section scan (OCT)) to better notice patterns that may be linked to common eye problems.",
+      "A more experienced “teacher” version of the smart computer helps train a lighter “helper” version, so you can get results faster.",
     ],
   },
 };

@@ -105,9 +105,9 @@ const Navbar = () => {
         <li>
           <Link to="/product">Product</Link>
         </li>
-        <Link to="/analyze" className="analyze-btn">
+        {/* <Link to="/analyze" className="analyze-btn">
           Analyze
-        </Link>
+        </Link> */}
       </ul>
       <div className="nav-actions">
         {/* <span className="search-icon">🔍</span> */}
@@ -118,7 +118,7 @@ const Navbar = () => {
           </button>
         ) : (
           <Link to="/login" className="trial-btn">
-            Free Trial
+            Try Now
           </Link>
         )}
         {/* Hamburger for tablet/mobile */}

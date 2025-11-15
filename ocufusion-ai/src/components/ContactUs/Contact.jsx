@@ -78,7 +78,9 @@ const Contact = () => {
         throw new Error("Unable to send your message right now.");
       }
 
-      toast.success("Message queued for our team. Gmail is open for your copy.");
+      toast.success(
+        "Message queued for our team. Gmail is open for your copy."
+      );
       setFormValues(defaultForm);
     } catch (error) {
       toast.error(error.message || "Unable to send your message right now.");
@@ -151,15 +153,16 @@ const Contact = () => {
         {/* Right: Info Panels */}
         <div className="contact-info">
           <div className="info-card">
-            <h3>For clinics or optometrists:</h3>
-            <p>Schedule a 15-minute intro call and get a free trial.</p>
-            <button className="btn info-btn">Book Intro + Free Trial</button>
+            {/* <h3>For clinics or optometrists:</h3> */}
+            {/* <p>Schedule a 15-minute intro call and get a free trial.</p> */}
+            <p>Click here to Try it Now.</p>
+            <button className="btn info-btn">Try Now</button>
           </div>
 
           <div className="divider">Or</div>
 
           <div className="info-card">
-            <p>Any eye care practitioner can test it for free.</p>
+            <p>You can see a demo video here of how to use a website.</p>
             <button
               type="button"
               className="btn info-btn"

@@ -76,7 +76,6 @@ async function requestPrediction(file, modality, baseUrl, logDebug) {
     modality: (payload.modality || modality || "fundus").toUpperCase(),
     data: payload,
   };
-  debugger;
 }
 
 export default function UploadAnalyzePage() {
@@ -88,7 +87,6 @@ export default function UploadAnalyzePage() {
   const [octFiles, setOctFiles] = useState([]);
   const [fundusFiles, setFundusFiles] = useState([]);
 
-  const [consented, setConsented] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [results, setResults] = useState([]);
   const [resetSelected, setResetSelected] = useState(false);
@@ -102,11 +100,8 @@ export default function UploadAnalyzePage() {
   const [isPinging, setIsPinging] = useState(false);
 
   const canAnalyze = useMemo(
-    () =>
-      consented &&
-      (octFiles.length > 0 || fundusFiles.length > 0) &&
-      !isAnalyzing,
-    [consented, octFiles, fundusFiles, isAnalyzing]
+    () => (octFiles.length > 0 || fundusFiles.length > 0) && !isAnalyzing,
+    [octFiles, fundusFiles, isAnalyzing]
   );
 
   const acceptOct = [".png", ".jpg", ".jpeg", "image/png", "image/jpeg"];
@@ -279,7 +274,6 @@ export default function UploadAnalyzePage() {
     setOctFiles([]);
     setFundusFiles([]);
     setResults([]);
-    setConsented(false);
     setResetSelected(false);
     setServerError(null);
     logDebug("Form reset");
@@ -292,7 +286,7 @@ export default function UploadAnalyzePage() {
       results.length === 0
         ? "<p>No analysis results available.</p>"
         : results
-            .map(({ filename, modality, data }) => {
+            .map(({ filename, data }) => {
               const predicted = data?.predicted_class_name || "Unknown";
               const confidence =
                 typeof data?.confidence === "number"
@@ -310,9 +304,9 @@ export default function UploadAnalyzePage() {
                 .join("");
               return `<section style="margin-bottom:24px;">
   <h2 style="margin:0 0 4px;font-size:18px;">${filename}</h2>
-  <div style="color:#49606b;font-size:14px;margin-bottom:8px;">${modality} • Top match: <strong>${predicted}</strong> (${confidence})</div>
+  <div style="color:#49606b;font-size:14px;margin-bottom:8px;">Most likely condition (AI): <strong>${predicted}</strong> (AI is ${confidence} sure)</div>
   <table style="border-collapse:collapse;width:100%;font-size:14px;">
-    <thead><tr><th style="text-align:left;padding:6px 10px;border:1px solid #e3e7ea;">Condition</th><th style="text-align:right;padding:6px 10px;border:1px solid #e3e7ea;">Probability</th></tr></thead>
+    <thead><tr><th style="text-align:left;padding:6px 10px;border:1px solid #e3e7ea;">Condition</th><th style="text-align:right;padding:6px 10px;border:1px solid #e3e7ea;">Chance (%)</th></tr></thead>
     <tbody>${probabilityRows}</tbody>
   </table>
 </section>`;
@@ -337,7 +331,7 @@ export default function UploadAnalyzePage() {
     <h1>Ocufusion AI — Analysis Report</h1>
     <div class="meta">Generated: ${dateStr}</div>
     ${sections}
-    <div class="footer">This report is for informational purposes only and not medical advice.</div>
+    <div class="footer">These results are created automatically by OcuFusion AI from the eye images you uploaded. They are for learning and research only and do not replace a consultation with a qualified eye specialist.</div>
   </body>
 </html>`;
   }
@@ -384,7 +378,7 @@ export default function UploadAnalyzePage() {
         <section className="ocf-card">
           <h1 className="ocf-title">Upload &amp; Analyze</h1>
 
-          {/* <div className="ocf-block">
+          <div className="ocf-block">
             <h2>Upload your OCT scans</h2>
             <div
               className="dropzone"
@@ -437,7 +431,7 @@ export default function UploadAnalyzePage() {
                 )}
               </div>
             )}
-          </div> */}
+          </div>
 
           <div className="ocf-block">
             <h2>Upload your fundus images</h2>
@@ -492,15 +486,6 @@ export default function UploadAnalyzePage() {
               </div>
             )}
           </div>
-
-          <label className="consent">
-            <input
-              type="checkbox"
-              checked={consented}
-              onChange={(e) => setConsented(e.target.checked)}
-            />
-            <span>I consent to the processing of my uploads for analysis</span>
-          </label>
 
           <div className="actions">
             <button
@@ -567,39 +552,33 @@ export default function UploadAnalyzePage() {
                       <div>
                         <div className="file-name">{entry.filename}</div>
                         <div className="file-sub">
-                          {entry.modality} •{" "}
+                          Most likely condition (AI):{" "}
                           <strong>
-                            {payload.predicted_class_name ||
-                              payload.predicted_class ||
-                              "Unknown"}
+                            {payload.predicted_class_name || "Not available"}
                           </strong>
                         </div>
                       </div>
                       {confidence !== null && (
                         <div className="confidence-pill">
-                          {confidence}% confidence
+                          AI is {confidence}% sure
                         </div>
                       )}
                     </div>
 
                     <div className="prediction-summary">
                       <div className="summary-item">
-                        <span>predicted_class</span>
-                        <strong>{payload.predicted_class || "—"}</strong>
-                      </div>
-                      <div className="summary-item">
-                        <span>predicted_class_name</span>
-                        <strong>{payload.predicted_class_name || "—"}</strong>
-                      </div>
-                      <div className="summary-item">
-                        <span>confidence</span>
+                        <span>Most likely condition (AI)</span>
                         <strong>
-                          {confidence !== null ? `${confidence}%` : "—"}
+                          {payload.predicted_class_name || "Not available"}
                         </strong>
                       </div>
                       <div className="summary-item">
-                        <span>modality</span>
-                        <strong>{payload.modality || entry.modality}</strong>
+                        <span>How sure the AI is</span>
+                        <strong>
+                          {confidence !== null
+                            ? `${confidence}%`
+                            : "Not available"}
+                        </strong>
                       </div>
                     </div>
 
@@ -607,7 +586,7 @@ export default function UploadAnalyzePage() {
                       <thead>
                         <tr>
                           <th>Condition</th>
-                          <th style={{ width: "110px" }}>Probability</th>
+                          <th style={{ width: "110px" }}>Chance (%)</th>
                           <th aria-hidden />
                         </tr>
                       </thead>
@@ -624,7 +603,7 @@ export default function UploadAnalyzePage() {
                                 <div
                                   className="bar"
                                   role="progressbar"
-                                  aria-label={`${name} probability`}
+                                  aria-label={`${name} chance`}
                                   aria-valuemin={0}
                                   aria-valuemax={100}
                                   aria-valuenow={percent}
@@ -672,8 +651,10 @@ export default function UploadAnalyzePage() {
           )}
 
           <p className="disclaimer">
-            Uploads are used for image analysis. Outputs are for informational
-            purposes and not intended as medical advice.
+            These results are created automatically by OcuFusion AI from the eye
+            images you upload. Only a qualified eye specialist can decide what
+            this means for your health. Please do not start, stop, or change any
+            treatment based on this report alone.
           </p>
 
           <section className="debug-panel">

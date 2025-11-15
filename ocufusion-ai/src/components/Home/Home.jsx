@@ -50,12 +50,12 @@ const Home = () => {
               <h1>AI for Medical Imaging</h1>
               <p>
                 Automated Decision Support for <br />
-                Accurate & Fast OCT Scan Analysis
+                Accurate & Fast Fundus and OCT Scan Analysis
               </p>
               <div className="hero-buttons">
                 {/* <button className="btn primary">Book Free Trial</button> */}
                 <button onClick={handleLoginClick} className="btn primary">
-                  Book Free Trial
+                  Try Now
                 </button>
                 <button onClick={handleDemoClick} className="btn secondary">
                   See Demo

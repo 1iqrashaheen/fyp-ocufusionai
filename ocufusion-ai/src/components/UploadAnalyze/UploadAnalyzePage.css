@@ -162,15 +162,7 @@ body {
   color: #7b8a91;
 }
 
-/* ===== Consent & actions ===== */
-.consent {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--muted);
-  font-size: 14px;
-  margin: 12px 0 10px;
-}
+/* ===== Actions ===== */
 .actions {
   display: flex;
   gap: 10px;
@@ -307,7 +299,7 @@ body {
 .file-sub {
   color: var(--muted);
   font-size: 13px;
-  text-transform: capitalize;
+  text-transform: none;
 }
 .confidence-pill {
   background: var(--teal-quiet);
