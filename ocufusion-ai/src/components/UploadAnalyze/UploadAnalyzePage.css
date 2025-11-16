@@ -453,6 +453,20 @@ body {
   gap: 10px;
   align-items: center;
 }
+.debug-hint {
+  margin: 6px 0 0;
+  font-size: 0.85rem;
+  color: #4b5c63;
+}
+.debug-hint code {
+  font-size: 0.85rem;
+  padding: 0 4px;
+  background: #f1f5f7;
+  border-radius: 4px;
+}
+.debug-hint.error {
+  color: #b42318;
+}
 .debug-input {
   flex: 1;
   min-width: 220px;

@@ -98,6 +98,14 @@ export default function UploadAnalyzePage() {
   const [debugEntries, setDebugEntries] = useState([]);
   const [pingStatus, setPingStatus] = useState(null);
   const [isPinging, setIsPinging] = useState(false);
+  const isHttpsPage =
+    typeof window !== "undefined" && window.location.protocol === "https:";
+  const devProxyTarget = import.meta.env.VITE_DEV_API_PROXY || "";
+  const devProxyPath =
+    import.meta.env.VITE_DEV_API_PROXY_PATH || "/__local_api";
+  const hasDevProxy = Boolean(devProxyTarget);
+  const isMixedContentBlocked =
+    isHttpsPage && /^http:\/\//i.test(apiBaseUrl || "");
 
   const canAnalyze = useMemo(
     () => (octFiles.length > 0 || fundusFiles.length > 0) && !isAnalyzing,
@@ -686,6 +694,23 @@ export default function UploadAnalyzePage() {
                 Reset
               </button>
             </div>
+
+            {isMixedContentBlocked && (
+              <p className="debug-hint error">
+                This site is loaded over HTTPS but the API base uses HTTP.
+                Modern browsers block that combination. Run the frontend locally
+                over HTTP or expose the backend via HTTPS before pinging.
+              </p>
+            )}
+            {/* 
+            {!isMixedContentBlocked && hasDevProxy && (
+              <p className="debug-hint">
+                Tip: keep the API base set to <code>{devProxyPath}</code> while
+                developing locally. Vite proxies that path to your backend at{" "}
+                <code>{devProxyTarget}</code>, so no extra tunnelling or CORS
+                setup is required.
+              </p>
+            )} */}
 
             <div className="debug-row">
               <button
