@@ -67,3 +67,4 @@ logs/
 # Ignore backend Flair pretrained weights
 backend/.venv/
 backend/flair/modeling/flair_pretrained_weights/
+ocufusion-ai/src/assets/Demo.mp4
