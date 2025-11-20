@@ -9,9 +9,9 @@ const workingContent = {
     "OcuFusion AI is a smart student project that helps with early eye screening. It looks at two kinds of eye images at the same time: a normal color photo of the back of your eye (Fundus) and a special side-view scan (OCT) that shows the layers inside your eye. By studying both images together, the system can highlight areas that might not look normal and may need a doctor to review them. The goal is to support eye specialists by saving time and helping them notice important signs more easily. You can also download simple reports that show the results in a clear way. This is a research prototype only (non-diagnostic) and it does not replace a real eye checkup with a doctor.",
 
   features: [
-    "📄 Easy-to-read PDF report with result summaries.",
-    "🧩 Can work with eye images from different clinics and hospitals.",
-    "🔒 Designed with privacy in mind: by default, we do not store personal details like your name, ID, or contact information.",
+    "Easy-to-read PDF report with result summaries.",
+    "Can work with eye images from different clinics and hospitals.",
+    "Designed with privacy in mind: by default, we do not store personal details like your name, ID, or contact information.",
     "Simple step-by-step use: Upload your eye images → Let the system analyze them → View and download your results.",
   ],
   // *Adjust the privacy line above once you confirm storage/retention behavior.

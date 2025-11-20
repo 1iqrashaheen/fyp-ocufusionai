@@ -1,15 +1,5 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import "./UploadAnalyzePage.css";
-/* Legacy explanation service import (commented per request)
-import {
-  fetchReportExplanation,
-  isExplanationConfigured as explanationConfigAvailable,
-} from "../../utils/explanationService";
-*/
-// import {
-//   fetchReportExplanation,
-//   isExplanationConfigured as explanationConfigAvailable,
-// } from "../../utils/explanationService";
 
 const DEFAULT_API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").replace(
   /\/$/,
@@ -38,14 +28,6 @@ function buildExplanationPayload(results, combinedResult) {
   };
 }
 */
-
-function buildExplanationPayload(results, combinedResult) {
-  return {
-    generatedAt: new Date().toISOString(),
-    individual: Array.isArray(results) ? results : [],
-    combined: Array.isArray(combinedResult) ? combinedResult : [],
-  };
-}
 
 function escapeHtml(text = "") {
   return text
@@ -238,23 +220,14 @@ export default function UploadAnalyzePage() {
   const [debugEntries, setDebugEntries] = useState([]);
   const [pingStatus, setPingStatus] = useState(null);
   const [isPinging, setIsPinging] = useState(false);
-  const [explanationText, setExplanationText] = useState("");
-  const [isGeneratingExplanation, setIsGeneratingExplanation] = useState(false);
-  const [explanationError, setExplanationError] = useState(null);
-  const explanationPromiseRef = useRef(null);
+  /* Explanation state removed */
   const fileDataCacheRef = useRef(new Map());
 
-  const explanationConfigReady = explanationConfigAvailable();
-  /* Previous explanation payload memoization
-  const explanationPayload = useMemo(
-    () => buildExplanationPayload(results, combinedResult),
-    [results, combinedResult]
-  );
-  */
-  const explanationPayload = useMemo(
-    () => buildExplanationPayload(results, combinedResult),
-    [results, combinedResult]
-  );
+  // const explanationConfigReady = explanationConfigAvailable();
+  // const explanationPayload = useMemo(
+  //   () => buildExplanationPayload(results, combinedResult),
+  //   [results, combinedResult]
+  // );
   const isHttpsPage =
     typeof window !== "undefined" && window.location.protocol === "https:";
   const devProxyTarget = import.meta.env.VITE_DEV_API_PROXY || "";
@@ -458,57 +431,11 @@ export default function UploadAnalyzePage() {
   }, [explanationPayload, hasResultsReady, explanationConfigReady]);
   */
 
-  // Gemini explanation generation (current implementation)
+  /* Gemini explanation generation (disabled)
   useEffect(() => {
-    if (!hasResultsReady) {
-      setExplanationText("");
-      setExplanationError(null);
-      explanationPromiseRef.current = null;
-      setIsGeneratingExplanation(false);
-      return;
-    }
-
-    if (!explanationConfigReady) {
-      setExplanationText("");
-      setExplanationError(
-        "Add your Gemini API key in .env to enable explanations."
-      );
-      explanationPromiseRef.current = null;
-      setIsGeneratingExplanation(false);
-      return;
-    }
-
-    let cancelled = false;
-    setIsGeneratingExplanation(true);
-    setExplanationError(null);
-    const promise = fetchReportExplanation(explanationPayload)
-      .then((text) => {
-        if (cancelled) return text;
-        setExplanationText(text);
-        setExplanationError(null);
-        return text;
-      })
-      .catch((err) => {
-        if (cancelled) return "";
-        const message =
-          err?.message ||
-          "We couldn't create an explanation. Please try again shortly.";
-        setExplanationText("");
-        setExplanationError(message);
-        throw err;
-      })
-      .finally(() => {
-        if (!cancelled) {
-          setIsGeneratingExplanation(false);
-        }
-      });
-
-    explanationPromiseRef.current = promise;
-
-    return () => {
-      cancelled = true;
-    };
+    ...
   }, [explanationPayload, hasResultsReady, explanationConfigReady]);
+  */
 
   function logDebug(message, data) {
     const entry = {
@@ -740,41 +667,17 @@ export default function UploadAnalyzePage() {
     setExplanationText("");
     setExplanationError(null);
     setIsGeneratingExplanation(false);
-    explanationPromiseRef.current = null;
     if (typeof window !== "undefined") {
       window.localStorage.removeItem(FILE_STORAGE_KEY);
     }
     logDebug("Form reset");
   }
 
-  function buildReportHtml(explanationData = {}) {
+  function buildReportHtml() {
     const now = new Date();
     const dateStr = now.toLocaleString();
 
     let sections = "";
-    const { text, error, generating, configured } = explanationData;
-    let explanationSection = "";
-
-    if (hasResultsReady) {
-      let message = "";
-      if (text) {
-        message = `<p style="margin:0;">${escapeHtml(text)}</p>`;
-      } else if (error) {
-        message = `<p style="margin:0;color:#b42318;">${escapeHtml(error)}</p>`;
-      } else if (configured === false) {
-        message =
-          '<p style="margin:0;">Add your AI key in the .env file to unlock automatic explanations.</p>';
-      } else if (generating) {
-        message = '<p style="margin:0;">Generating explanation…</p>';
-      } else {
-        message =
-          '<p style="margin:0;">No explanation is available for these predictions.</p>';
-      }
-      explanationSection = `<section style="margin-top:24px;border:1px solid #dbe8f0;padding:16px;border-radius:8px;background:#f6fbff;">
-  <h2 style="margin:0 0 8px;font-size:18px;color:#005a72;">Result Explanation</h2>
-  ${message}
-</section>`;
-    }
 
     // Add combined results
     if (combinedResult.length > 0) {
@@ -800,7 +703,7 @@ export default function UploadAnalyzePage() {
       <div style="margin-bottom:8px;"><strong>Diagnosis:</strong> ${
         octData?.predicted_class_name || "N/A"
       }</div>
-      <div style="margin-bottom:8px;"><strong>Confidence:</strong> ${
+      <div style="margin-bottom:8px;"><strong>Probability:</strong> ${
         octData?.confidence ? formatPercent(octData.confidence) + "%" : "N/A"
       }</div>
       <table style="border-collapse:collapse;width:100%;font-size:13px;">
@@ -821,7 +724,7 @@ export default function UploadAnalyzePage() {
       <div style="margin-bottom:8px;"><strong>Diagnosis:</strong> ${
         fundusData?.predicted_class_name || "N/A"
       }</div>
-      <div style="margin-bottom:8px;"><strong>Confidence:</strong> ${
+      <div style="margin-bottom:8px;"><strong>Probability:</strong> ${
         fundusData?.confidence
           ? formatPercent(fundusData.confidence) + "%"
           : "N/A"
@@ -865,7 +768,7 @@ export default function UploadAnalyzePage() {
             .join("");
           return `<section style="margin-bottom:24px;">
   <h2 style="margin:0 0 4px;font-size:18px;">${filename}</h2>
-  <div style="color:#49606b;font-size:14px;margin-bottom:8px;">Most likely condition (AI): <strong>${predicted}</strong> (AI is ${confidence} sure)</div>
+          <div style="color:#49606b;font-size:14px;margin-bottom:8px;">Most likely condition (AI): <strong>${predicted}</strong> (Probability ${confidence})</div>
   <table style="border-collapse:collapse;width:100%;font-size:14px;">
     <thead><tr><th style="text-align:left;padding:6px 10px;border:1px solid #e3e7ea;">Condition</th><th style="text-align:right;padding:6px 10px;border:1px solid #e3e7ea;">Chance (%)</th></tr></thead>
     <tbody>${probabilityRows}</tbody>
@@ -879,9 +782,9 @@ export default function UploadAnalyzePage() {
       sections = "<p>No analysis results available.</p>";
     }
 
-    const reportBody = `${sections}${explanationSection}`;
+    const reportBody = sections;
 
-    return `<!doctype html>
+  return `<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -905,34 +808,9 @@ export default function UploadAnalyzePage() {
 </html>`;
   }
 
-  async function getExplanationForReport() {
-    if (!hasResultsReady) return "";
-    if (explanationText) {
-      return explanationText;
-    }
-    if (!explanationConfigReady) {
-      return "";
-    }
-    if (explanationPromiseRef.current) {
-      try {
-        const text = await explanationPromiseRef.current;
-        return text;
-      } catch (_err) {
-        return "";
-      }
-    }
-    return "";
-  }
-
   async function viewReport() {
     if (!hasResultsReady) return;
-    const explanationForReport = await getExplanationForReport();
-    const html = buildReportHtml({
-      text: explanationForReport,
-      error: explanationError,
-      generating: isGeneratingExplanation,
-      configured: explanationConfigReady,
-    });
+    const html = buildReportHtml();
     const w = window.open("", "_blank");
     if (!w) return;
     w.document.open();
@@ -942,13 +820,7 @@ export default function UploadAnalyzePage() {
 
   async function downloadReport() {
     if (!hasResultsReady) return;
-    const explanationForReport = await getExplanationForReport();
-    const html = buildReportHtml({
-      text: explanationForReport,
-      error: explanationError,
-      generating: isGeneratingExplanation,
-      configured: explanationConfigReady,
-    });
+    const html = buildReportHtml();
     const w = window.open("", "_blank");
     if (!w) return;
     w.document.open();
@@ -1010,7 +882,7 @@ export default function UploadAnalyzePage() {
                   <strong>{octData?.predicted_class_name || "N/A"}</strong>
                 </div>
                 <div className="summary-item">
-                  <span>Confidence</span>
+                  <span>Probability</span>
                   <strong>
                     {octData?.confidence
                       ? `${formatPercent(octData.confidence)}%`
@@ -1052,7 +924,7 @@ export default function UploadAnalyzePage() {
                   <strong>{fundusData?.predicted_class_name || "N/A"}</strong>
                 </div>
                 <div className="summary-item">
-                  <span>Confidence</span>
+                  <span>Probability</span>
                   <strong>
                     {fundusData?.confidence
                       ? `${formatPercent(fundusData.confidence)}%`
@@ -1308,8 +1180,8 @@ export default function UploadAnalyzePage() {
                         </div>
                       </div>
                       {confidence !== null && (
-                        <div className="confidence-pill">
-                          AI is {confidence}% sure
+                        <div className="probability-pill">
+                          Probability {confidence}%
                         </div>
                       )}
                     </div>
@@ -1405,26 +1277,6 @@ export default function UploadAnalyzePage() {
             this means for your health. Please do not start, stop, or change any
             treatment based on this report alone.
           </p>
-
-          {hasResultsReady && (
-            <section className="report-explanation" aria-live="polite">
-              <div className="report-explanation__heading">
-                Result explanation
-              </div>
-              {isGeneratingExplanation && explanationConfigReady ? (
-                <p className="report-explanation__note">
-                  Generating a plain-language explanation for your report…
-                </p>
-              ) : explanationText ? (
-                <p className="report-explanation__text">{explanationText}</p>
-              ) : (
-                <p className="report-explanation__note">
-                  {explanationError ||
-                    "Add your Gemini API key in .env to include explanations in the PDF report."}
-                </p>
-              )}
-            </section>
-          )}
 
           <section className="debug-panel">
             <div className="debug-panel-header">Connection debug</div>

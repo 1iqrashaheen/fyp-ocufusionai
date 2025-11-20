@@ -52,7 +52,7 @@ const Navbar = () => {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      toast.success("✅ Logged out successfully");
+      toast.success("Logged out successfully");
       setMenuOpen(false);
       navigate("/");
     } catch (error) {
@@ -105,9 +105,9 @@ const Navbar = () => {
         <li>
           <Link to="/product">Product</Link>
         </li>
-        {/* <Link to="/analyze" className="analyze-btn">
-          Analyze
-        </Link> */}
+        <Link to={currentUser ? "/analyze" : "/login"} className="analyze-btn">
+          ProcessImages
+        </Link>
       </ul>
       <div className="nav-actions">
         {/* <span className="search-icon">🔍</span> */}
@@ -117,7 +117,7 @@ const Navbar = () => {
             Logout
           </button>
         ) : (
-          <Link to="/login" className="trial-btn">
+          <Link to={currentUser ? "/analyze" : "/login"} className="trial-btn">
             Try Now
           </Link>
         )}
@@ -155,9 +155,9 @@ const Navbar = () => {
         <Link to="/product" onClick={closeMenu}>
           Product
         </Link>
-        {/* <Link to="/analyze" onClick={closeMenu}>
-          UploadAnalyzePage
-        </Link> */}
+        <Link to={currentUser ? "/analyze" : "/login"} onClick={closeMenu}>
+          ProcessImages
+        </Link>
       </div>
     </nav>
   );

@@ -64,5 +64,6 @@ logs/
 # Ignore model checkpoints
 *.pth
 
-# Ignore model checkpoints
-*.pth
+# Ignore backend Flair pretrained weights
+backend/.venv/
+backend/flair/modeling/flair_pretrained_weights/

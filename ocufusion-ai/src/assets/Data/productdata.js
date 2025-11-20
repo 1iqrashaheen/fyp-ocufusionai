@@ -2,7 +2,7 @@
 // import headerBg from "../decision-header-bg.png";
 import iconBars from "../workflow-bars.png";
 import iconTree from "../workflow-trees.png";
-import demoVideoSrc from "../Demo.mov?url";
+import demoVideoSrc from "../Demo.mp4?url";
 
 // Fundus references
 import fundusNormal from "../fundus_images/Normal.png";
@@ -19,6 +19,7 @@ import octNormal from "../oct_images/Normal.png";
 import octdAMD from "../oct_images/dAMD.png";
 import octCSC from "../oct_images/CSC.png";
 import octDR from "../oct_images/DR.png";
+import octGLC from "../oct_images/GLC.png";
 import octMEM from "../oct_images/MEM.png";
 import octRVO from "../oct_images/RVO.png";
 import octwAMD from "../oct_images/wAMD.png";
@@ -50,6 +51,7 @@ const octAssets = {
   dAMD: octdAMD,
   CSC: octCSC,
   DR: octDR,
+  GLC: octGLC,
   MEM: octMEM,
   RVO: octRVO,
   wAMD: octwAMD,
