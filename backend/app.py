@@ -491,10 +491,12 @@ logger = logging.getLogger(__name__)
 # -------------------------------------------------------------------
 # Configuration from environment variables (with safe defaults)
 # -------------------------------------------------------------------
-# Strict: raise KeyError if missing
-FLASK_HOST  = os.environ["FLASK_HOST"]
-FLASK_PORT  = int(os.environ["FLASK_PORT"])
-FLASK_DEBUG = os.environ["FLASK_DEBUG"].lower() == "true"
+FLASK_HOST = os.getenv("FLASK_HOST", "0.0.0.0")
+
+# Default port 5001 to avoid common macOS conflicts on 5000
+FLASK_PORT = int(os.getenv("FLASK_PORT", "5001"))
+
+FLASK_DEBUG = os.getenv("FLASK_DEBUG", "True").lower() == "true"
 
 # Frontend origins for CORS (comma-separated)
 _frontend_origins = os.getenv(
