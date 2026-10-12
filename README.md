@@ -1,5 +1,3 @@
-
-
 # run backend and frontend
 
 Backend
@@ -11,6 +9,15 @@ cp .env.example .env and tweak ports/model paths if needed.
 python app.py (Flask serves on http://localhost:5001 by default).
 Quick sanity: curl http://localhost:5001/health should return JSON with model status.
 Frontend
+
+for vscode:
+
+cd backend
+python -m venv .venv
+.\venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
+python app.py
 
 # ocufusion-ai
 
