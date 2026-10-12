@@ -3,6 +3,7 @@ import React from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar/Navbar";
 import Footer from "./components/Footer/Footer";
+import ProjectNotice from "./components/ProjectNotice/ProjectNotice";
 import Home from "./components/Home/Home";
 import LoginSignup from "./components/LoginSignup/loginsignup";
 import Product from "./components/Product/Product";
@@ -22,6 +23,7 @@ const App = () => {
   return (
     <>
       {!NO_NAVBAR.includes(pathname) && <Navbar />}
+      {!NO_NAVBAR.includes(pathname) && <ProjectNotice />}
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/product" element={<Product />} />

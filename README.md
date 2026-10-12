@@ -1,5 +1,25 @@
 # run backend and frontend
 
+## Vercel deployment
+
+Frontend production: https://ocufusion-ai.vercel.app
+
+Vercel project: `ocufusion-ai` in `iqras-projects-1121dd52`.
+For GitHub deployments, use root directory `ocufusion-ai`, framework Vite,
+build command `npm run build`, and output directory `dist`.
+`ocufusion-ai/vercel.json` handles direct navigation to React routes.
+
+The Python AI backend is pending deployment until model checkpoints are available.
+Once it is hosted with HTTPS, set `VITE_API_BASE_URL` in the Vercel project's
+production environment to that service's URL and redeploy the frontend.
+Ensure the backend permits requests from `https://ocufusion-ai.vercel.app`.
+For Google/Facebook sign-in, add `ocufusion-ai.vercel.app` to Firebase
+Authentication's authorized domains for project `vrtryon-demo`.
+
+To deploy local changes after the project is configured with that root directory,
+run `npx vercel --prod` from the repository root (link the root to the same
+Vercel project when prompted).
+
 Backend
 
 cd backend

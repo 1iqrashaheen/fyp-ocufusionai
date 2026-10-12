@@ -1,0 +1,7 @@
+backend/
+.claude/
+**/node_modules/
+**/dist/
+**/.firebase/
+**/.env
+**/.env.*

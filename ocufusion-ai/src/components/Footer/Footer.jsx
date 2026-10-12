@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import Logo from "../Logo/Logo";
+import { SOURCE_URL } from "../../project";
 import "./Footer.css";
 
 const Footer = () => {
@@ -18,6 +19,7 @@ const Footer = () => {
           <Link to="/product">Reference library</Link>
           <Link to="/analyze">Analyze</Link>
           <Link to="/#contact">Contact</Link>
+          <a href={SOURCE_URL} target="_blank" rel="noopener noreferrer">GitHub source ↗</a>
         </nav>
       </div>
       <p className="footer__note">

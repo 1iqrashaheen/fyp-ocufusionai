@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { findCondition, urgencyLabel } from "../../assets/Data/conditions";
 import "./UploadAnalyzePage.css";
+import { ANALYSIS_UNAVAILABLE } from "../../project";
 
 // Falls back to the Flask default port from backend/app.py
 const DEFAULT_API_BASE_URL = (
@@ -281,7 +282,7 @@ export default function UploadAnalyzePage() {
   const isHttpsPage = typeof window !== "undefined" && window.location.protocol === "https:";
   const isMixedContentBlocked = isHttpsPage && /^http:\/\//i.test(apiBaseUrl || "");
 
-  const canAnalyze = (octFiles.length > 0 || fundusFiles.length > 0) && !isAnalyzing;
+  const canAnalyze = !ANALYSIS_UNAVAILABLE && (octFiles.length > 0 || fundusFiles.length > 0) && !isAnalyzing;
   const pairs = Math.min(octFiles.length, fundusFiles.length);
   const cards = useMemo(() => buildCards(combinedResult, results), [combinedResult, results]);
   const hasResultsReady = cards.length > 0;
@@ -388,6 +389,7 @@ export default function UploadAnalyzePage() {
   }, [fundusFiles]);
 
   const pingBackend = useCallback(async () => {
+    if (ANALYSIS_UNAVAILABLE) return;
     if (!apiBaseUrl) {
       setHealth({ state: "down", detail: "Set the AI service address first." });
       return;
@@ -660,7 +662,9 @@ export default function UploadAnalyzePage() {
           <div>
             <h1 className="ua-title">Analyze</h1>
           </div>
-          <button
+          {ANALYSIS_UNAVAILABLE ? (
+            <span className="ua-status">AI service: Awaiting checkpoints</span>
+          ) : <button
             type="button"
             className={`ua-status ua-status--${health.state}`}
             onClick={() => setConnOpen((v) => !v)}
@@ -672,7 +676,7 @@ export default function UploadAnalyzePage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M6 9l6 6 6-6" />
             </svg>
-          </button>
+          </button>}
         </div>
         {connOpen && (
           <div id="ua-conn-panel" className="ua-conn__panel">
@@ -832,7 +836,7 @@ export default function UploadAnalyzePage() {
           <div className="ua-actions">
             <button type="button" className="ui-btn ui-btn--primary ua-analyze" onClick={analyze} disabled={!canAnalyze}>
               {isAnalyzing && <Spinner />}
-              {isAnalyzing ? "Analyzing…" : pairs > 0 ? "Analyze pair" : "Analyze"}
+              {ANALYSIS_UNAVAILABLE ? "Analysis unavailable" : isAnalyzing ? "Analyzing…" : pairs > 0 ? "Analyze pair" : "Analyze"}
             </button>
             <button type="button" className="ui-btn ui-btn--ghost" onClick={reset} disabled={isAnalyzing}>
               Reset
@@ -877,8 +881,10 @@ export default function UploadAnalyzePage() {
                 <circle cx="16" cy="16" r="9.5" stroke="#2c5552" strokeWidth="1.6" />
                 <circle cx="16" cy="16" r="5" stroke="var(--accent)" strokeWidth="1.6" />
               </svg>
-              <h3>Results will appear here</h3>
-              <p>Add an image on the left and press Analyze, or load a sample pair to try a full paired read.</p>
+              <h3>{ANALYSIS_UNAVAILABLE ? "Analysis is awaiting model checkpoints" : "Results will appear here"}</h3>
+              <p>{ANALYSIS_UNAVAILABLE
+                ? "You can preview images and sample pairs. Predictions and reports will be available once the trained models and backend are deployed."
+                : "Add an image on the left and press Analyze, or load a sample pair to try a full paired read."}</p>
             </div>
           )}
 
