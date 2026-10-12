@@ -1,27 +1,41 @@
-import worksimage from "../worksimage.png";
+// Copy for the "How it works" and "Behind the scenes" sections on Home.
+// Facts here come from backend/README.md (MultiEYE / OCT-CoDA).
 
 const workingContent = {
-  image: worksimage,
-  heading:
-    "OcuFusion AI uses two types of eye scans together to help with clearer and faster eye checks.",
-
-  intro:
-    "OcuFusion AI is a smart student project that helps with early eye screening. It looks at two kinds of eye images at the same time: a normal color photo of the back of your eye (Fundus) and a special side-view scan (OCT) that shows the layers inside your eye. By studying both images together, the system can highlight areas that might not look normal and may need a doctor to review them. The goal is to support eye specialists by saving time and helping them notice important signs more easily. You can also download simple reports that show the results in a clear way. This is a research prototype only (non-diagnostic) and it does not replace a real eye checkup with a doctor.",
-
-  features: [
-    "Easy-to-read PDF report with result summaries.",
-    "Can work with eye images from different clinics and hospitals.",
-    "Designed with privacy in mind: by default, we do not store personal details like your name, ID, or contact information.",
-    "Simple step-by-step use: Upload your eye images → Let the system analyze them → View and download your results.",
+  steps: [
+    {
+      icon: "upload",
+      title: "Upload your images",
+      text: "Drop in a fundus photo, an OCT scan, or both. PNG or JPG, up to 32 MB per request. Several pairs can be queued at once.",
+    },
+    {
+      icon: "read",
+      title: "Two models read them",
+      text: "A fundus model and an OCT model each score all nine conditions. For a pair, OcuFusion checks whether both land on the same answer.",
+    },
+    {
+      icon: "report",
+      title: "Get a clear report",
+      text: "See the most likely condition, every score, and what it means in plain words. Save it as a PDF to share with your eye specialist.",
+    },
   ],
-  // *Adjust the privacy line above once you confirm storage/retention behavior.
 
-  chooseUs: [
-    "Helps reduce missed signs by looking at two types of eye scans together instead of just one.",
-    "Gives visual highlights on the images so you and your doctor can easily see which parts of the eye may need more attention.",
-    "Very simple flow: just upload the files, wait for the analysis, then view and export the report if you want to save or share it.",
-    "Provides clear scores and numbers so researchers can compare performance over time and improve the system further.",
-    "Built in separate, flexible parts so future developers can add new eye scan types, new models, or new datasets without starting from zero.",
+  behindIntro:
+    "OcuFusion builds on MultiEYE and its OCT-assisted Conceptual Distillation (OCT-CoDA). A model trained on OCT scans learns disease concepts from the retina's layers, then passes that knowledge to a lighter fundus model, so even a fundus photo on its own benefits from what OCT can see.",
+
+  behind: [
+    {
+      title: "Clean the image",
+      text: "Fundus photos get contrast-limited histogram equalisation; OCT scans get a median filter. Both are resized and padded so nothing is distorted.",
+    },
+    {
+      title: "Match against disease concepts",
+      text: "Each image is compared with a library of described symptoms for every condition, which keeps predictions tied to visible signs.",
+    },
+    {
+      title: "Teacher to student",
+      text: "The OCT teacher distils its knowledge into the fundus student, trained on data assembled from 12 public fundus and 4 OCT datasets.",
+    },
   ],
 };
 

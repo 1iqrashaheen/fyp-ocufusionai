@@ -1,131 +1,130 @@
 // src/components/Product/Product.jsx
-import React, { useEffect, useRef } from "react";
+// Reference library: every condition the models predict, with fundus and
+// OCT examples, plus the optional demo video.
+import React, { useEffect, useRef, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import "./Product.css";
 import productData from "../../assets/Data/productdata";
-import { useLocation } from "react-router-dom";
+import conditions from "../../assets/Data/conditions";
+
+const MODES = [
+  { key: "both", label: "Both" },
+  { key: "fundus", label: "Fundus" },
+  { key: "oct", label: "OCT" },
+];
 
 const Product = () => {
-  const { header, mainCard, galleries, behind } = productData;
+  const { header, demoVideo, footnote } = productData;
+  const [mode, setMode] = useState("both");
   const videoRef = useRef(null);
+  const demoRef = useRef(null);
   const location = useLocation();
 
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-  }, []);
-
-  const handleDemoClick = () => {
-    if (!videoRef.current) return;
-    try {
-      videoRef.current.currentTime = 0;
-      const playPromise = videoRef.current.play();
-      if (playPromise && typeof playPromise.then === "function") {
-        playPromise.catch(() => {
+    if (location.hash === "#demo" && demoRef.current) {
+      demoRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+      const video = videoRef.current;
+      if (video) {
+        video.currentTime = 0;
+        video.play()?.catch(() => {
           /* Autoplay protections intentionally ignored */
         });
       }
-      videoRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-    } catch (error) {
-      console.error("Unable to start demo video", error);
-    }
-  };
-
-  useEffect(() => {
-    if (location.hash === "#demo") {
-      handleDemoClick();
+    } else {
+      window.scrollTo({ top: 0, left: 0 });
     }
   }, [location.hash]);
 
+  const showFundus = mode !== "oct";
+  const showOct = mode !== "fundus";
+
   return (
-    <div className="product-page">
-      {/* Header */}
-      <header className="product-header">
-        <h1 className="product-header__title">{header.title}</h1>
-        <p className="product-header__subtitle">{header.subtitle}</p>
-        <button
-          className="product-header__demo-btn btn"
-          onClick={handleDemoClick}
-        >
-          {header.buttonText}
-        </button>
-      </header>
-
-      {/* Combined Demo Section */}
-      <section className="product-demo" id="demo">
-        {/* Main Scan Card */}
-        <div className="product-main-card">
-          <div className="product-main-card__tags">
-            {/* {mainCard.tags.map((tag, i) => (
-              <span key={i} className={`product-tag product-tag--${tag.style}`}>
-                {tag.label}
-              </span>
-            ))} */}
-          </div>
-          <div className="product-video">
-            <div className="product-video__frame">
-              <video
-                ref={videoRef}
-                className="product-video__player"
-                src={mainCard.demoVideo.src}
-                preload="metadata"
-                controls
-                controlsList="nodownload noremoteplayback"
-                disablePictureInPicture
-                onContextMenu={(event) => event.preventDefault()}
-                playsInline
-              >
-                <track kind="captions" />
-              </video>
-            </div>
-          </div>
+    <main className="lib">
+      <div className="lib__head">
+        <div className="lib__intro">
+          <div className="eyebrow">{header.eyebrow}</div>
+          <h1>{header.title}</h1>
+          <p>{header.subtitle}</p>
         </div>
-      </section>
+        <div className="lib__toggle" role="group" aria-label="Show images">
+          {MODES.map((m) => (
+            <button
+              key={m.key}
+              type="button"
+              aria-pressed={mode === m.key}
+              onClick={() => setMode(m.key)}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {/* Reference Galleries */}
-      <section className="product-galleries">
-        <p className="product-gallery__intro">{galleries.intro}</p>
-        {[galleries.fundus, galleries.oct].map((gallery, idx) => (
-          <div className="product-gallery" key={`${gallery.heading}-${idx}`}>
-            <div className="product-gallery__header">
-              <h3 className="product-gallery__heading">{gallery.heading}</h3>
-              <p className="product-gallery__description">
-                {gallery.description}
-              </p>
+      <div className="lib__grid">
+        {conditions.map((c) => (
+          <article key={c.code} className="lib-card">
+            {c.fundus ? (
+              <div className={`lib-card__images ${mode === "both" ? "is-pair" : ""}`}>
+                {showFundus && (
+                  <figure>
+                    <img src={c.fundus} alt={`Fundus reference: ${c.name}`} loading="lazy" />
+                    <figcaption>FUNDUS</figcaption>
+                  </figure>
+                )}
+                {showOct && (
+                  <figure>
+                    <img src={c.oct} alt={`OCT reference: ${c.name}`} loading="lazy" />
+                    <figcaption>OCT</figcaption>
+                  </figure>
+                )}
+              </div>
+            ) : (
+              <div className="lib-card__empty">Reference images coming soon</div>
+            )}
+            <div className="lib-card__body">
+              <div className="lib-card__title">
+                <h2>{c.name}</h2>
+                <span className="mono">{c.code}</span>
+              </div>
+              <p>{c.about}</p>
             </div>
-            <div className="product-thumbs">
-              {gallery.items.map((item) => (
-                <div className="product-thumb" key={item.short}>
-                  <img
-                    src={item.src}
-                    alt={item.label}
-                    className="product-thumb__image"
-                  />
-                  <p className="product-thumb__label">{item.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          </article>
         ))}
-      </section>
+      </div>
 
-      {/* Behind the Scenes */}
-      <section className="product-behind">
-        <h2 className="product-behind__heading">{behind.heading}</h2>
-        <div className="product-behind__content">
-          <div className="product-behind__icons">
-            {behind.icons.map((src, i) => (
-              <img key={i} src={src} alt="" className="product-behind__icon" />
-            ))}
-          </div>
-          <ul className="product-behind__list">
-            {behind.items.map((item, i) => (
-              <li key={i} className="product-behind__item">
-                {item}
-              </li>
-            ))}
-          </ul>
+      <section id="demo" ref={demoRef} className="lib-demo">
+        <div className="lib-demo__copy">
+          <div className="eyebrow">Demo</div>
+          <h2>{demoVideo.title}</h2>
+          <p>{demoVideo.text}</p>
+          <Link to="/analyze" className="ui-btn ui-btn--primary">
+            Try it yourself
+          </Link>
+        </div>
+        <div className="lib-demo__frame">
+          {demoVideo.src ? (
+            <video
+              ref={videoRef}
+              src={demoVideo.src}
+              preload="metadata"
+              controls
+              controlsList="nodownload noremoteplayback"
+              disablePictureInPicture
+              onContextMenu={(event) => event.preventDefault()}
+              playsInline
+            >
+              <track kind="captions" />
+            </video>
+          ) : (
+            <div className="lib-demo__missing">
+              Add <span className="mono">src/assets/Demo.mp4</span> to show the demo video here.
+            </div>
+          )}
         </div>
       </section>
-    </div>
+
+      <p className="lib__footnote">{footnote}</p>
+    </main>
   );
 };
 

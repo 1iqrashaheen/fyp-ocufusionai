@@ -3,23 +3,25 @@ import aboutUsData from "../../assets/Data/Aboutusdata";
 import "./About.css";
 
 const About = () => {
-  const { heading, image, description, bullets } = aboutUsData;
+  const { heading, description, cards } = aboutUsData;
 
   return (
-    <section id="about" className="about-section">
-      <h2>{heading}</h2>
-      <div className="about-content">
-        <div className="about-image">
-          <img src={image} alt={heading} />
-        </div>
-        <div className="about-text">
-          <p>{description}</p>
-          <ul>
-            {bullets.map((b, idx) => (
-              <li key={idx}>{b}</li>
-            ))}
-          </ul>
-        </div>
+    <section id="about" className="about">
+      <div className="about__copy">
+        <div className="eyebrow">About</div>
+        <h2>{heading}</h2>
+        <p>{description}</p>
+      </div>
+      <div className="about__cards">
+        {cards.map((card) => (
+          <div
+            key={card.title}
+            className={`about__card ${card.tone === "warn" ? "about__card--warn" : ""}`}
+          >
+            <strong>{card.title}</strong>
+            <p>{card.text}</p>
+          </div>
+        ))}
       </div>
     </section>
   );
